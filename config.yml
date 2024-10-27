@@ -1,0 +1,47 @@
+DEFAULT_PATH: v1
+
+PORT: 9443
+LOG_REQUESTS: false
+
+IGNORE_FILES:
+- react-native-0.61.5.pom
+- -sources.jar
+
+VALID_FILE_TYPES:
+- .aar
+- .jar
+- .module
+- .pom
+- .sha1
+- .xml
+- .zip
+
+
+REPOSITORIES:
+
+- name: maven-google
+  url: https://maven.google.com
+
+- name: central
+  url: https://repo1.maven.org/maven2
+
+- name: google
+  url: https://dl.google.com/dl/android/maven2
+
+- name: google-aliyun
+  url: https://maven.aliyun.com/repository/google
+
+- name: gradle
+  url: https://plugins.gradle.org/m2
+
+- name: apache
+  url: https://repo.maven.apache.org/maven2
+
+- name: spring-aliyun
+  url: https://maven.aliyun.com/repository/spring
+
+- name: kotlin-dev
+  url: https://maven.pkg.jetbrains.space/kotlin/p/kotlin/dev
+
+- name: jitpack
+  url: https://jitpack.io

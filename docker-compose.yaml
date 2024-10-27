@@ -1,0 +1,12 @@
+services:
+  mirror:
+    image: ghcr.io/aminnez/maven-mirror:latest
+    build:
+      context: .
+    restart: unless-stopped
+    ports:
+      - 9443:9443
+    volumes:
+      - ./config.yml:/home/node/app/config.yml
+      - ./privkey.pem:/home/node/app/privkey.pem  
+      - ./cert.pem:/home/node/app/cert.pem
