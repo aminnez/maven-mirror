@@ -1,12 +1,11 @@
-import { RequestHandler } from 'express';
-
+import { Handler } from '@fastify/middie';
 import { IGNORE_FILES, VALID_FILE_TYPES } from '../config';
-import { extractFileInfo } from '../utils';
+import { extractFileInfo, send403, send404 } from '../utils';
 
-export const ValidateRequestHandler: RequestHandler = (req, res, next) => {
-  const url = req.url;
+export const ValidateRequestHandler: Handler = (req, res, next) => {
+  const url = req.url.replace(/^\/\w+\//, '/');
   if (req.method !== 'HEAD' && req.method !== 'GET') {
-    res.sendStatus(403);
+    send403(res);
     return;
   }
 
@@ -14,13 +13,13 @@ export const ValidateRequestHandler: RequestHandler = (req, res, next) => {
 
   if (!VALID_FILE_TYPES.includes('.' + fileExtension)) {
     console.log('♻️', url);
-    res.status(404);
+    send404(res);
     return;
   }
 
   if (IGNORE_FILES.find((str) => url.includes(str))) {
     console.log('❌ [404]', url);
-    res.status(404);
+    send404(res);
     return;
   }
 

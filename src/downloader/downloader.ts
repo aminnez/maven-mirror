@@ -1,11 +1,16 @@
 import got, { GotOptions } from 'got';
-import type { Response, Request } from 'express';
-
-import { PROXIES, REPOSITORIES } from '../config';
+import { IncomingMessage, ServerResponse } from 'http';
+import { CACHE_DIR, PROXIES, REPOSITORIES, TMP_DIR } from '../config';
 import { ProxyAgent } from 'proxy-agent';
 import { Server } from 'app/types';
+import { extractFileInfo, headersToMap } from '../utils';
+import { pipeline } from 'stream';
+import { promisify } from 'util';
+import { IncomingMessageExtended } from '@fastify/middie';
+import path from 'path';
+import fs, { createWriteStream } from 'fs';
 
-export class GotDownloader {
+export class Downloader {
   db: Record<
     string,
     {
@@ -50,19 +55,20 @@ export class GotDownloader {
     return options;
   };
 
-  checkServer = (url: string, srv: Server) => {
+  checkRespository = (url: string, srv: Server) => {
     const options = this.getOptions(srv, 'head');
     return got.head(srv.url + url, options);
   };
 
-  getSupportedServer = async (url: string) => {
+  getRepository = async (url: string) => {
     if (this.db[url]?.serverIndex) {
       return REPOSITORIES[this.db[url].serverIndex];
     }
-    const gotPromises = REPOSITORIES.map((srv) => this.checkServer(url, srv));
+    const gotPromises = REPOSITORIES.map((srv) =>
+      this.checkRespository(url, srv)
+    );
     return Promise.any(gotPromises.map((req, index) => req.then(() => index)))
       .then((index) => {
-        // cancel all got requests
         gotPromises.forEach((req) => req.cancel());
         this.db[url] = {
           serverIndex: index,
@@ -72,18 +78,28 @@ export class GotDownloader {
       .catch(() => null);
   };
 
-  head = ({ url, srv, res }: { url: string; srv: Server; res: Response }) => {
+  head = ({
+    url,
+    srv,
+    res,
+  }: {
+    url: string;
+    srv: Server;
+    res: ServerResponse;
+  }) => {
     got
       .head(srv.url + url, this.getOptions(srv, 'head'))
       .then((r) => {
-        res.set(r.headers);
+        const headersMap = headersToMap(r.headers);
+        res.setHeaders(headersMap);
         if (!res.headersSent) {
-          res.sendStatus(r.statusCode);
+          res.statusCode = r.statusCode;
+          res.end();
         }
       })
       .catch((r: { statusCode?: number }) => {
         if (!res.headersSent) {
-          res.sendStatus(r?.statusCode ?? 404);
+          res.statusCode = r?.statusCode ?? 404;
         }
       });
   };
@@ -91,15 +107,22 @@ export class GotDownloader {
   download = ({
     url,
     srv,
+    req,
     res,
   }: {
     url: string;
     srv: Server;
-    req: Request;
-    res: Response;
+    req: IncomingMessage & IncomingMessageExtended;
+    res: ServerResponse;
   }) => {
+    const { fileName, relativePath } = extractFileInfo(url);
+    const pipelineAsync = promisify(pipeline);
+    const tmpPath = path.join(TMP_DIR, fileName);
     const stream = got.stream(srv.url + url, this.getOptions(srv));
-    stream.pipe(res);
+    const fileWriterStream = createWriteStream(tmpPath);
+
+    pipelineAsync(stream, res);
+    stream.pipe(fileWriterStream);
 
     stream.once('downloadProgress', ({ total }) => {
       if (total) {
@@ -110,7 +133,8 @@ export class GotDownloader {
     stream.on('error', (err) => {
       console.log('❌', srv.url + url);
       console.log('⛔️', err.message);
-      res.destroy(err);
+      res.statusCode = 500;
+      res.end(err);
     });
 
     stream.on('finish', () => {
@@ -122,8 +146,40 @@ export class GotDownloader {
         delete this.db[url];
         if (res.statusCode && res.statusCode >= 200 && res.statusCode < 300) {
           console.log(`✅ [${srv.name}]`, url);
+          const destPath = path.join(
+            CACHE_DIR,
+            srv.name,
+            relativePath,
+            fileName
+          );
+          this.copyFileToCache(tmpPath, destPath);
+
+          if (req.headers['alias-url']) {
+            const info = extractFileInfo(req.headers['alias-url'] as string);
+            const aliasPath = path.join(
+              CACHE_DIR,
+              srv.name,
+              info.relativePath,
+              info.fileName
+            );
+            this.copyFileToCache(destPath, aliasPath, false);
+          }
         }
       });
     });
+  };
+
+  copyFileToCache = (source: string, dest: string, moveFile = true) => {
+    const { relativePath: destDir } = extractFileInfo(dest);
+    if (fs.existsSync(source) ? fs.statSync(source).size > 0 : false) {
+      if (!fs.existsSync(destDir)) {
+        fs.mkdirSync(destDir, { recursive: true });
+      }
+      if (moveFile) {
+        fs.renameSync(source, dest);
+      } else {
+        fs.copyFileSync(source, dest);
+      }
+    }
   };
 }

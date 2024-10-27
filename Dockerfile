@@ -3,20 +3,17 @@ ARG ALPINE_VERSION=3.20
 
 FROM node:${NODE_VERSION}-alpine${ALPINE_VERSION}
 
-# Use production node environment by default.
-ENV NODE_ENV=production
-
 # install and use yarn 4.x
 RUN corepack prepare yarn@4.3.1
 
 # Run as a root user.
 USER root
 
-RUN mkdir -p /home/node/app
-RUN chown -R node:node /home/node/app
+RUN mkdir -p /home/app
+RUN chown -R node:node /home/app
 
 # Set working directory
-WORKDIR /home/node/app
+WORKDIR /home/app
 
 # Run the application as a non-root user.
 USER node
