@@ -27,7 +27,6 @@ app.get('*', ValidateRequestHandler);
 app.get('*', LegacyGradlePluginsHandler);
 app.get('*', MirrorRequestHandler);
 
-
 https.createServer(SSL_OPTIONS, app).listen(PORT, () => {
   console.log('add this ⬇️  in build.gradle');
   console.log(
