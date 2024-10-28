@@ -5,13 +5,12 @@ import middie from '@fastify/middie';
 import morgan from 'morgan';
 import path from 'path';
 import { PORT, TMP_DIR, VERBOSE, CACHE_DIR, DEFAULT_PATH } from './config';
-import { handleError, printServedEndpoints } from './utils';
+import { printServedEndpoints } from './utils';
 import { MirrorRequestHandler } from './handlers/mirror-handler';
 import { ValidateRequestHandler } from './handlers/validate-request-handler';
 import { NotFoundHandler } from './handlers/not-found-handler';
 import { HomeHandler } from './handlers/home_handler';
 import { StaticHandler } from './handlers/static_handler';
-import { ServerResponse } from 'http';
 
 // SSL options using self-signed certificate for localhost
 const getSSLOptions = () => ({
@@ -29,8 +28,6 @@ async function main() {
 
   try {
     await registerMiddleware(fastify);
-
-    setErrorHandlers(fastify);
 
     await startServer(fastify);
 
@@ -62,25 +59,6 @@ async function registerMiddleware(fastify: FastifyInstance) {
   fastify.use(ValidateRequestHandler);
   fastify.use(MirrorRequestHandler);
   fastify.use(NotFoundHandler);
-}
-
-function setErrorHandlers(fastify: FastifyInstance) {
-  fastify.setNotFoundHandler(async (request, reply) => {
-    const res: ServerResponse = reply.raw;
-    await handleError(
-      res,
-      404,
-      'Page Not Found - The page you are looking for does not exist.'
-    );
-  });
-
-  fastify.setErrorHandler(async (error, request, reply) => {
-    const res: ServerResponse = reply.raw;
-    const statusCode = error.statusCode ?? 500;
-    const message =
-      error.message || 'Internal Server Error - An unexpected error occurred.';
-    await handleError(res, statusCode, message);
-  });
 }
 
 async function startServer(fastify: FastifyInstance) {

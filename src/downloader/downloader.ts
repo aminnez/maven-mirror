@@ -47,34 +47,53 @@ export class Downloader {
     }
 
     if (method === 'head') {
-      options.timeout = { request: 5000 };
+      options.timeout = { request: 10000 };
     }
 
     return options;
   }
 
-  checkRespository = (url: string, srv: Server) => {
+  private async checkRepository(url: string, srv: Server) {
     const options = this.getOptions(srv, 'head');
-    return got.head(srv.url + url, options);
-  };
+    const head = await got.head(srv.url + url, options);
+    return head;
+  }
 
-  getRepository = async (url: string) => {
-    if (this.db[url]?.serverIndex) {
+  async getRepository(url: string) {
+    if (this.db[url]?.serverIndex !== undefined) {
       return REPOSITORIES[this.db[url].serverIndex];
     }
-    const gotPromises = REPOSITORIES.map((srv) =>
-      this.checkRespository(url, srv)
-    );
-    return Promise.any(gotPromises.map((req, index) => req.then(() => index)))
-      .then((index) => {
-        gotPromises.forEach((req) => req.cancel());
-        this.db[url] = {
-          serverIndex: index,
-        };
-        return REPOSITORIES[index];
-      })
-      .catch(() => null);
-  };
+
+    try {
+      const availableServerIndex = await this.findAvailableServerIndex(url);
+      if (availableServerIndex !== null) {
+        this.db[url] = { serverIndex: availableServerIndex };
+        return REPOSITORIES[availableServerIndex];
+      }
+    } catch {
+      return null;
+    }
+  }
+
+  private async findAvailableServerIndex(url: string): Promise<number | null> {
+    const gotPromises = REPOSITORIES.map(async (srv, index) => {
+      try {
+        const check = await this.checkRepository(url, srv);
+        console.log(check);
+        return index;
+      } catch (error) {
+        console.error(error);
+        return null;
+      }
+    });
+
+    try {
+      const availableIndex = await Promise.any(gotPromises);
+      return availableIndex ?? null;
+    } catch {
+      return null;
+    }
+  }
 
   async head({
     url,

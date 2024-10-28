@@ -53,7 +53,6 @@ const handleCachedRequest = async (
 ) => {
   try {
     const fileStats = await stat(filePath);
-    console.log('📥', fileStats);
     if (isCacheValid(req, fileStats)) {
       res.statusCode = 304;
       return res.end();
