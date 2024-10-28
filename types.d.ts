@@ -23,7 +23,7 @@ export interface Config {
   PORT: number;
   CACHE_DIR: string;
   CACHE_TIME: number;
-  REPOSITORIES: TServer[];
+  REPOSITORIES: Server[];
   DEFAULT_PATH: string;
   LOG_REQUESTS?: boolean;
   IGNORE_FILES?: string[];

@@ -1,29 +1,45 @@
 import { Handler } from '@fastify/middie';
 import { IGNORE_FILES, VALID_FILE_TYPES } from '../config';
-import { extractFileInfo, send403, send404 } from '../utils';
+import {
+  extractFileInfo,
+  logRequest,
+  normalizeUrl,
+  send403,
+  send404,
+} from '../utils';
 
 export const ValidateRequestHandler: Handler = (req, res, next) => {
-  const url = req.url.replace(/^\/\w+\//, '/');
-  if (req.method !== 'HEAD' && req.method !== 'GET') {
-    send403(res);
-    return;
+  const url = normalizeUrl(req.url);
+
+  if (!isMethodAllowed(req.method)) {
+    console.error('❌ method not allowed', req.method, url);
+    return send403(res);
   }
 
-  const { fileExtension } = extractFileInfo(url);
-
-  if (!VALID_FILE_TYPES.includes('.' + fileExtension)) {
-    console.log('♻️', url);
-    send404(res);
-    return;
+  if (!isValidFileType(url)) {
+    logRequest('♻️', url);
+    return send404(res);
   }
 
-  if (IGNORE_FILES.find((str) => url.includes(str))) {
-    console.log('❌ [404]', url);
-    send404(res);
-    return;
+  if (isIgnoredFile(url)) {
+    logRequest('❌ [404]', url);
+    return send404(res);
   }
 
-  console.log(req.method, url);
+  logRequest(req.method, url);
 
   next();
+};
+
+const isMethodAllowed = (method: string | undefined): boolean => {
+  return method === 'HEAD' || method === 'GET';
+};
+
+const isValidFileType = (url: string): boolean => {
+  const { fileExtension } = extractFileInfo(url);
+  return VALID_FILE_TYPES.includes('.' + fileExtension);
+};
+
+const isIgnoredFile = (url: string): boolean => {
+  return IGNORE_FILES.some((str) => url.includes(str));
 };

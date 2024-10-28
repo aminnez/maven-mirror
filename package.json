@@ -12,7 +12,7 @@
   "homepage": "https://github.com/aminnez/maven-mirror",
   "scripts": {
     "start": "pm2 start --attach",
-    "dev": "pm2 start --attach --watch --ignore-watch=\"node_modules\"",
+    "dev": "pm2 start --attach --watch --ignore-watch=\"node_modules local-cache\"",
     "logs": "pm2 logs",
     "monit": "pm2 monit",
     "stop": "pm2 delete mmt-server",

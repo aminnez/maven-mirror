@@ -19,5 +19,5 @@ export default [
       },
     },
   },
-  { ignores: ['eslint.config.mjs', 'ecosystem.config.js', '.yarn/'] },
+  { ignores: ['eslint.config.mjs', 'ecosystem.config.js', '.yarn/' , 'public/'] },
 ];

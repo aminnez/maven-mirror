@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Maven Mirror Repository</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link canonical href="https://maven.aminnez.com:9443/v1">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Maven Mirror Repository</h1>
+      <p>A reliable and fast Maven repository mirror for your dependencies.</p>
+    </header>
+
+    <main>
+      <div class="info-card">
+        <h2>Welcome to My Maven Mirror!</h2>
+        <p>Use the mirror URL below in your Maven or Gradle configuration to speed up your builds.</p>
+        <div class="mirror-url">
+          <code>https://maven.aminnez.com:9443/v1</code>
+          <button id="copyBtn"><i class="fas fa-copy"></i> Copy URL</button>
+        </div>
+
+        <br>
+        <strong>More info at:</strong>
+        <a href="https://github.com/aminnez/maven-mirror" target="_blank">https://github.com/aminnez/maven-mirror</a>
+      </div>
+
+      <div class="usage-section">
+        <h3>Usage Instructions</h3>
+        <div class="usage-card">
+          <h4>Gradle</h4>
+          <button class="copy-code-btn" data-target="0"><i class="fas fa-copy"></i> Copy Code</button>
+          <pre><code>repositories {
+    maven {
+        url "https://maven.aminnez.com:9443/v1"
+    }
+}</code></pre>          
+        </div>
+
+        <div class="usage-card">
+          <h4>Maven</h4>
+          <button class="copy-code-btn" data-target="1"><i class="fas fa-copy"></i> Copy Code</button>
+          <pre><code>&lt;repositories&gt;
+    &lt;repository&gt;
+        &lt;id&gt;mirror-repo&lt;/id&gt;
+        &lt;url&gt;https://maven.aminnez.com:9443/v1&lt;/url&gt;
+    &lt;/repository&gt;
+&lt;/repositories&gt;</code></pre>
+        </div>
+      </div>
+    </main>
+
+    <footer>
+      <p>&copy; 2024 Maven Mirror. All rights reserved.</p>
+    </footer>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>

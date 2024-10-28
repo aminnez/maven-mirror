@@ -2516,13 +2516,13 @@ __metadata:
   linkType: hard
 
 "light-my-request@npm:^6.0.0":
-  version: 6.2.0
-  resolution: "light-my-request@npm:6.2.0"
+  version: 6.3.0
+  resolution: "light-my-request@npm:6.3.0"
   dependencies:
     cookie: "npm:^1.0.1"
     process-warning: "npm:^4.0.0"
     set-cookie-parser: "npm:^2.6.0"
-  checksum: 10c0/f748c47346c44ff4e9ca9ea491638e166fd3b0663d5238a806699252b3a22784c00eca638eaa9dda26a33163837d0bd8cddde83195b30a611f136ee4d8eb200f
+  checksum: 10c0/a5b33461a7c6a00f5ed89fd62aa384d424c480566ee5016c8d2becd87eb5d5c7d60b4fffcdcc6ac4b64283df7a91c50423a1baae19aa131e7eaba2fd493c092b
   languageName: node
   linkType: hard
 

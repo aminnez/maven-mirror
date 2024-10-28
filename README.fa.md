@@ -137,7 +137,7 @@ services:
       - 9443:9443
     volumes:
       - ./config.yml:/home/app/config.yml
-      - ./privkey.pem:/home/app/privkey.pem  
+      - ./privkey.pem:/home/app/privkey.pem
       - ./cert.pem:/home/app/cert.pem
       - ./local-cache:/home/app/local-cache
 ```
