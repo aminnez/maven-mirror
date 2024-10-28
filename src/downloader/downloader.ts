@@ -53,46 +53,28 @@ export class Downloader {
     return options;
   }
 
-  private async checkRepository(url: string, srv: Server) {
+  checkRespository = (url: string, srv: Server) => {
     const options = this.getOptions(srv, 'head');
     return got.head(srv.url + url, options);
-  }
+  };
 
-  async getRepository(url: string) {
-    if (this.db[url]?.serverIndex !== undefined) {
+  getRepository = async (url: string) => {
+    if (this.db[url]?.serverIndex) {
       return REPOSITORIES[this.db[url].serverIndex];
     }
-
-    try {
-      const availableServerIndex = await this.findAvailableServerIndex(url);
-      if (availableServerIndex !== null) {
-        this.db[url] = { serverIndex: availableServerIndex };
-        return REPOSITORIES[availableServerIndex];
-      }
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (error) {
-      return null;
-    }
-  }
-
-  private async findAvailableServerIndex(url: string): Promise<number | null> {
-    const gotPromises = REPOSITORIES.map(async (srv, index) => {
-      try {
-        await this.checkRepository(url, srv);
-        return index;
-      } catch (error) {
-        console.error(error);
-        return null;
-      }
-    });
-
-    try {
-      const availableIndex = await Promise.any(gotPromises);
-      return availableIndex ?? null;
-    } catch {
-      return null;
-    }
-  }
+    const gotPromises = REPOSITORIES.map((srv) =>
+      this.checkRespository(url, srv)
+    );
+    return Promise.any(gotPromises.map((req, index) => req.then(() => index)))
+      .then((index) => {
+        gotPromises.forEach((req) => req.cancel());
+        this.db[url] = {
+          serverIndex: index,
+        };
+        return REPOSITORIES[index];
+      })
+      .catch(() => null);
+  };
 
   async head({
     url,
