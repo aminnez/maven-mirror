@@ -27,7 +27,7 @@ It also supports **caching** to improve performance by reducing latency and savi
 
 ### Configuration
 
-If you want, edit `config.yml` to customize the settings:
+If you want to customize the settings, copy the `config-default.yml` and rename it to `config.yml` and edit it:
   - Update the `REPOSITORIES` section to specify the Maven repositories you want to mirror.
   - Adjust other settings like port number, caching options, or proxy servers as needed.
   - Configure the cache duration with `CACHE_TIME` (in seconds).

@@ -29,8 +29,17 @@ REPOSITORIES:
 - name: google
   url: https://dl.google.com/dl/android/maven2
 
+- name: flutter
+  url: http://download.flutter.io
+
 - name: google-aliyun
   url: https://maven.aliyun.com/repository/google
+
+- name: public-aliyun
+  url: https://maven.aliyun.com/repository/public
+
+- name: central-aliyun
+  url: https://maven.aliyun.com/repository/central
 
 - name: gradle
   url: https://plugins.gradle.org/m2

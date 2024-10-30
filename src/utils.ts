@@ -4,7 +4,7 @@ import os from 'os';
 import path from 'path';
 import { CACHE_DIR, CACHE_TIME, REPOSITORIES } from './config';
 
-const getFileStats = async (filePath: string) => {
+export const getFileStats = async (filePath: string) => {
   try {
     const stats = await fs.stat(filePath);
     return stats;

@@ -12,11 +12,15 @@ import { NotFoundHandler } from './handlers/not-found-handler';
 import { HomeHandler } from './handlers/home_handler';
 import { StaticHandler } from './handlers/static_handler';
 
-// SSL options using self-signed certificate for localhost
-const getSSLOptions = () => ({
-  key: fs.readFileSync('./privkey.pem'), // Path to the private key file
-  cert: fs.readFileSync('./cert.pem'), // Path to the self-signed certificate file
-});
+const getSSLOptions = () => {
+  if (fs.existsSync('./privkey.pem') && fs.existsSync('./cert.pem')) {
+    return {
+      key: fs.readFileSync('./privkey.pem'), // Path to the private key file
+      cert: fs.readFileSync('./cert.pem'), // Path to the self-signed certificate file
+    };
+  }
+  return null;
+};
 
 async function main() {
   initializeDirectories([CACHE_DIR, TMP_DIR]);

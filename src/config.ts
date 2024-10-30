@@ -4,9 +4,9 @@ import yaml from 'js-yaml';
 import { Config } from '../types';
 
 const config = yaml.load(
-  fs.existsSync('config.local.yml')
-    ? fs.readFileSync('config.local.yml', 'utf8')
-    : fs.readFileSync('config.yml', 'utf8')
+  fs.existsSync('config.yml')
+    ? fs.readFileSync('config.yml', 'utf8')
+    : fs.readFileSync('config-default.yml', 'utf8')
 ) as Config;
 
 const {
